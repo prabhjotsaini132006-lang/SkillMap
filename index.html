@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SkillMap - Roadmaps</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+        <div class="container header-content">
+
+            <a href="index.html" class="logo">
+                SkillMap
+            </a>
+
+            <button
+                type="button"
+                id="theme-toggle"
+                class="btn btn-secondary"
+            >
+                Toggle Theme
+            </button>
+
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="page-intro">
+            <h1>My Roadmaps</h1>
+
+            <p>
+                Build your learning path and track your progress
+                through a skill-based roadmap.
+            </p>
+        </section>
+
+
+        <section
+            class="roadmap-creation"
+            aria-labelledby="create-roadmap-heading"
+        >
+
+            <h2 id="create-roadmap-heading">
+                Create a Roadmap
+            </h2>
+
+            <form id="roadmap-form">
+
+                <div class="form-group">
+
+                    <label for="roadmap-name">
+                        Roadmap Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="roadmap-name"
+                        name="roadmap-name"
+                        placeholder="e.g. Full Stack Development"
+                        minlength="3"
+                        maxlength="100"
+                        autocomplete="off"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="roadmap-description">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="roadmap-description"
+                        name="roadmap-description"
+                        placeholder="Describe what you want to learn..."
+                        rows="4"
+                        maxlength="500"
+                    ></textarea>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Create Roadmap
+                </button>
+
+            </form>
+
+        </section>
+
+
+        <section
+            class="roadmaps-section"
+            aria-labelledby="roadmaps-heading"
+        >
+
+            <h2 id="roadmaps-heading">
+                Your Roadmaps
+            </h2>
+
+            <div id="roadmap-list">
+
+                <!-- Roadmap cards will be created using JavaScript. -->
+
+                <article class="roadmap-card">
+
+                    <div class="roadmap-card-content">
+
+                        <h3>
+                            Example Roadmap
+                        </h3>
+
+                        <p>
+                            Your roadmap cards will appear here.
+                        </p>
+
+                        <p>
+                            Progress: 0%
+                        </p>
+
+                    </div>
+
+
+                    <div class="roadmap-card-actions">
+
+                        <a
+                            href="roadmap.html"
+                            class="btn btn-primary"
+                        >
+                            Open
+                        </a>
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                        >
+                            Rename
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                        >
+                            Delete
+                        </button>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer class="site-footer">
+
+        <p>
+            &copy; 2026 SkillMap
+        </p>
+
+    </footer>
+
+
+    <script
+        type="module"
+        src="js/roadmaps.js"
+    ></script>
+
+</body>
+</html>
