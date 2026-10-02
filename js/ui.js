@@ -91,6 +91,28 @@ function renderSkills(skills) {
                 <p>Status: ${skill.status}</p>
 
             </div>
+
+            <div class="roadmap-card-actions">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-action="edit-skill"
+                    data-skill-id="${skill.id}"
+                >
+                    Edit
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-action="delete-skill"
+                    data-skill-id="${skill.id}"
+                >
+                    Delete
+                </button>
+
+            </div>
         `;
 
         skillList.appendChild(skillCard);

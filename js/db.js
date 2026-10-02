@@ -141,6 +141,58 @@ function getSkillsByRoadmap(roadmapId) {
     });
 }
 
+function getSkill(skillId) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction("skills", "readonly");
+        const store = transaction.objectStore("skills");
+
+        const request = store.get(skillId);
+
+        request.addEventListener("success", () => {
+            resolve(request.result);
+        });
+
+        request.addEventListener("error", () => {
+            reject(request.error);
+        });
+    });
+}
+
+
+function updateSkill(skill) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction("skills", "readwrite");
+        const store = transaction.objectStore("skills");
+
+        const request = store.put(skill);
+
+        request.addEventListener("success", () => {
+            resolve(skill);
+        });
+
+        request.addEventListener("error", () => {
+            reject(request.error);
+        });
+    });
+}
+
+function deleteSkill(skillId) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction("skills", "readwrite");
+        const store = transaction.objectStore("skills");
+
+        const request = store.delete(skillId);
+
+        request.addEventListener("success", () => {
+            resolve();
+        });
+
+        request.addEventListener("error", () => {
+            reject(request.error);
+        });
+    });
+}
+
 export {
     openDatabase,
     addRoadmap,
@@ -148,5 +200,8 @@ export {
     updateRoadmap,
     deleteRoadmap,
     addSkill,
-    getSkillsByRoadmap
+    getSkillsByRoadmap,
+    getSkill,
+    updateSkill,
+    deleteSkill
 };
