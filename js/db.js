@@ -1,5 +1,5 @@
 const DB_NAME = "skillmap-db";
-const DB_VERSION = 1;
+const DB_VERSION = 3;
 
 let db;
 
@@ -21,6 +21,12 @@ function openDatabase() {
 
             if (!database.objectStoreNames.contains("roadmaps")) {
                 database.createObjectStore("roadmaps", {
+                    keyPath: "id"
+                });
+            }
+
+            if (!database.objectStoreNames.contains("skills")) {
+                database.createObjectStore("skills", {
                     keyPath: "id"
                 });
             }
@@ -96,11 +102,51 @@ function deleteRoadmap(id) {
     });
 }
 
+function addSkill(skill) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction("skills", "readwrite");
+        const store = transaction.objectStore("skills");
+
+        const request = store.add(skill);
+
+        request.addEventListener("success", () => {
+            resolve(skill);
+        });
+
+        request.addEventListener("error", () => {
+            reject(request.error);
+        });
+    });
+}
+
+
+function getSkillsByRoadmap(roadmapId) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction("skills", "readonly");
+        const store = transaction.objectStore("skills");
+
+        const request = store.getAll();
+
+        request.addEventListener("success", () => {
+            const skills = request.result.filter((skill) => {
+                return skill.roadmapId === roadmapId;
+            });
+
+            resolve(skills);
+        });
+
+        request.addEventListener("error", () => {
+            reject(request.error);
+        });
+    });
+}
 
 export {
     openDatabase,
     addRoadmap,
     getRoadmaps,
     updateRoadmap,
-    deleteRoadmap
+    deleteRoadmap,
+    addSkill,
+    getSkillsByRoadmap
 };

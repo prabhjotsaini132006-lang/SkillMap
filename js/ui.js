@@ -61,6 +61,43 @@ function renderRoadmaps(roadmaps) {
     });
 }
 
+function renderSkills(skills) {
+    const skillList = document.querySelector("#skill-list");
+
+    skillList.innerHTML = "";
+
+    if (skills.length === 0) {
+        skillList.innerHTML = `
+            <p>No skills added yet.</p>
+        `;
+
+        return;
+    }
+
+    skills.forEach((skill) => {
+        const skillCard = document.createElement("article");
+
+        skillCard.className = "roadmap-card";
+
+        skillCard.innerHTML = `
+            <div class="roadmap-card-content">
+
+                <h3>${skill.name}</h3>
+
+                <p>${skill.description}</p>
+
+                <p>Difficulty: ${skill.difficulty}</p>
+
+                <p>Status: ${skill.status}</p>
+
+            </div>
+        `;
+
+        skillList.appendChild(skillCard);
+    });
+}
+
 export {
-    renderRoadmaps
+    renderRoadmaps,
+    renderSkills
 };
