@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SkillMap - Roadmap</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+        <div class="container header-content">
+
+            <a href="index.html" class="logo">
+                SkillMap
+            </a>
+
+            <a
+                href="index.html"
+                class="btn btn-secondary"
+            >
+                Back to Roadmaps
+            </a>
+
+        </div>
+    </header>
+
+
+    <main class="container">
+
+        <section
+            class="roadmap-header"
+            aria-labelledby="roadmap-title"
+        >
+
+            <h1 id="roadmap-title">
+                Roadmap Name
+            </h1>
+
+            <p id="roadmap-description">
+                Roadmap description will appear here.
+            </p>
+
+            <p id="roadmap-progress">
+                Progress: 0%
+            </p>
+
+        </section>
+
+
+        <section
+            class="skill-form-section"
+            aria-labelledby="add-skill-heading"
+        >
+
+            <h2 id="add-skill-heading">
+                Add Skill
+            </h2>
+
+            <form id="skill-form">
+
+                <div class="form-group">
+
+                    <label for="skill-name">
+                        Skill Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="skill-name"
+                        name="skill-name"
+                        placeholder="e.g. Arrays"
+                        minlength="2"
+                        maxlength="100"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="skill-description">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="skill-description"
+                        name="skill-description"
+                        placeholder="Describe this skill..."
+                        rows="4"
+                        maxlength="500"
+                    ></textarea>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="skill-difficulty">
+                        Difficulty
+                    </label>
+
+                    <select
+                        id="skill-difficulty"
+                        name="skill-difficulty"
+                        required
+                    >
+                        <option value="">
+                            Select difficulty
+                        </option>
+
+                        <option value="easy">
+                            Easy
+                        </option>
+
+                        <option value="medium">
+                            Medium
+                        </option>
+
+                        <option value="hard">
+                            Hard
+                        </option>
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="skill-resource">
+                        Resource Link
+                    </label>
+
+                    <input
+                        type="url"
+                        id="skill-resource"
+                        name="skill-resource"
+                        placeholder="https://example.com"
+                    >
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Add Skill
+                </button>
+
+            </form>
+
+        </section>
+
+
+        <section
+            class="skill-tree-section"
+            aria-labelledby="skill-tree-heading"
+        >
+
+            <h2 id="skill-tree-heading">
+                Skill Tree
+            </h2>
+
+            <div id="skill-tree">
+
+                <!-- Skill tree nodes will be generated using JavaScript. -->
+
+            </div>
+
+        </section>
+
+
+        <section
+            class="skills-section"
+            aria-labelledby="skills-heading"
+        >
+
+            <h2 id="skills-heading">
+                Skills
+            </h2>
+
+            <div id="skill-list">
+
+                <!-- Skill cards will be generated using JavaScript. -->
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer class="site-footer">
+
+        <p>
+            &copy; 2026 SkillMap
+        </p>
+
+    </footer>
+
+
+    <script
+        type="module"
+        src="js/roadmap.js"
+    ></script>
+
+</body>
+
+</html>
