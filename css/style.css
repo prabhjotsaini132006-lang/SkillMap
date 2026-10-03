@@ -239,3 +239,81 @@ main {
         text-align: center;
     }
 }
+
+
+#skill-tree {
+    position: relative;
+
+    display: flex;
+    gap: var(--spacing-large);
+
+    padding: var(--spacing-large);
+
+    overflow-x: auto;
+}
+
+.skill-tree-level {
+    min-width: 180px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: var(--spacing-medium);
+}
+
+.skill-tree-level h3 {
+    margin: 0;
+
+    text-align: center;
+}
+
+.skill-tree-node {
+    display: flex;
+    flex-direction: column;
+
+    gap: 0.25rem;
+
+    padding: var(--spacing-medium);
+
+    background-color: var(--color-surface);
+
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius);
+
+    text-align: center;
+}
+
+.skill-tree-node strong {
+    font-size: 1rem;
+}
+
+.skill-tree-node span {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.skill-tree-lines {
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
+
+    z-index: 1;
+
+    overflow: visible;
+}
+
+.skill-tree-level {
+    position: relative;
+    z-index: 2;
+}
+
+.skill-tree-line {
+    stroke: var(--color-primary);
+    stroke-width: 3;
+}

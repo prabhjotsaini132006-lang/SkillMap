@@ -193,10 +193,27 @@ function deleteSkill(skillId) {
     });
 }
 
+function getRoadmap(roadmapId) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction("roadmaps", "readonly");
+        const store = transaction.objectStore("roadmaps");
+        const request = store.get(roadmapId);
+
+        request.addEventListener("success", () => {
+            resolve(request.result);
+        });
+
+        request.addEventListener("error", () => {
+            reject(request.error);
+        });
+    });
+}
+
 export {
     openDatabase,
     addRoadmap,
     getRoadmaps,
+    getRoadmap,
     updateRoadmap,
     deleteRoadmap,
     addSkill,
