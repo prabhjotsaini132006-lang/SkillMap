@@ -87,17 +87,38 @@ function updateRoadmap(roadmap) {
 
 function deleteRoadmap(id) {
     return new Promise((resolve, reject) => {
-        const transaction = db.transaction("roadmaps", "readwrite");
-        const store = transaction.objectStore("roadmaps");
+        const transaction = db.transaction(
+            ["roadmaps", "skills"],
+            "readwrite"
+        );
 
-        const request = store.delete(id);
+        const roadmapStore = transaction.objectStore("roadmaps");
+        const skillStore = transaction.objectStore("skills");
 
-        request.addEventListener("success", () => {
+        const getAllRequest = skillStore.getAll();
+
+        getAllRequest.addEventListener("success", () => {
+            const skills = getAllRequest.result;
+
+            skills.forEach((skill) => {
+                if (skill.roadmapId === id) {
+                    skillStore.delete(skill.id);
+                }
+            });
+
+            roadmapStore.delete(id);
+        });
+
+        getAllRequest.addEventListener("error", () => {
+            reject(getAllRequest.error);
+        });
+
+        transaction.addEventListener("complete", () => {
             resolve();
         });
 
-        request.addEventListener("error", () => {
-            reject(request.error);
+        transaction.addEventListener("error", () => {
+            reject(transaction.error);
         });
     });
 }
@@ -181,14 +202,34 @@ function deleteSkill(skillId) {
         const transaction = db.transaction("skills", "readwrite");
         const store = transaction.objectStore("skills");
 
-        const request = store.delete(skillId);
+        const getAllRequest = store.getAll();
 
-        request.addEventListener("success", () => {
+        getAllRequest.addEventListener("success", () => {
+            const skills = getAllRequest.result;
+
+            skills.forEach((skill) => {
+                if (skill.prerequisites.includes(skillId)) {
+                    skill.prerequisites = skill.prerequisites.filter(
+                        (prerequisiteId) => prerequisiteId !== skillId
+                    );
+
+                    store.put(skill);
+                }
+            });
+
+            store.delete(skillId);
+        });
+
+        getAllRequest.addEventListener("error", () => {
+            reject(getAllRequest.error);
+        });
+
+        transaction.addEventListener("complete", () => {
             resolve();
         });
 
-        request.addEventListener("error", () => {
-            reject(request.error);
+        transaction.addEventListener("error", () => {
+            reject(transaction.error);
         });
     });
 }

@@ -220,7 +220,7 @@
         </section>
 
 
-        <section
+                <section
             class="skills-section"
             aria-labelledby="skills-heading"
         >
@@ -229,6 +229,40 @@
                 Skills
             </h2>
 
+            <div class="skill-filters">
+
+                <div class="form-group">
+                    <label for="skill-search">Search Skills</label>
+                    <input
+                        type="search"
+                        id="skill-search"
+                        placeholder="Search by skill name..."
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="status-filter">Status</label>
+                    <select id="status-filter">
+                        <option value="all">All Statuses</option>
+                        <option value="locked">Locked</option>
+                        <option value="available">Available</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="difficulty-filter">Difficulty</label>
+                    <select id="difficulty-filter">
+                        <option value="all">All Difficulties</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+
+            </div>
+
             <div id="skill-list">
 
                 <!-- Skill cards will be generated using JavaScript. -->
@@ -236,6 +270,39 @@
             </div>
 
         </section>
+
+        <section
+    class="data-section"
+    aria-labelledby="data-heading"
+>
+    <h2 id="data-heading">
+        Roadmap Data
+    </h2>
+
+    <div class="data-actions">
+        <button
+            type="button"
+            id="export-roadmap"
+            class="btn btn-secondary"
+        >
+            Export JSON
+        </button>
+
+        <label
+            for="import-roadmap"
+            class="btn btn-secondary"
+        >
+            Import JSON
+        </label>
+
+        <input
+            type="file"
+            id="import-roadmap"
+            accept=".json,application/json"
+            hidden
+        >
+    </div>
+</section>
 
     </main>
 

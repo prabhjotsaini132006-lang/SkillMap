@@ -1,6 +1,7 @@
 import {
     openDatabase,
     getRoadmap,
+    addRoadmap,
     addSkill,
     getSkillsByRoadmap,
     getSkill,
@@ -30,6 +31,11 @@ const skillDifficultyInput = document.querySelector("#skill-difficulty");
 const skillResourceInput = document.querySelector("#skill-resource");
 const skillStatusInput = document.querySelector("#skill-status");
 const skillSubmitButton = document.querySelector("#skill-submit-button");
+const skillSearchInput = document.querySelector("#skill-search");
+const statusFilter = document.querySelector("#status-filter");
+const difficultyFilter = document.querySelector("#difficulty-filter");
+const exportButton = document.querySelector("#export-roadmap");
+const importInput = document.querySelector("#import-roadmap");
 let editingSkillId = null;
 
 function getRoadmapId() {
@@ -98,10 +104,132 @@ async function refreshRoadmap() {
             ? `Suggested Next Skill: ${suggestedSkill.name}`
             : "Suggested Next Skill: None";
 
-    renderSkills(skills);
+    renderSkills(filterSkills(skills));
     renderSkillTree(skills);
     drawSkillTreeLines(skills);
 }
+
+function filterSkills(skills) {
+    const searchTerm = skillSearchInput.value.trim().toLowerCase();
+    const selectedStatus = statusFilter.value;
+    const selectedDifficulty = difficultyFilter.value;
+
+    return skills.filter((skill) => {
+        const matchesSearch = skill.name
+            .toLowerCase()
+            .includes(searchTerm);
+
+        const matchesStatus =
+            selectedStatus === "all" ||
+            skill.status === selectedStatus;
+
+        const matchesDifficulty =
+            selectedDifficulty === "all" ||
+            skill.difficulty === selectedDifficulty;
+
+        return (
+            matchesSearch &&
+            matchesStatus &&
+            matchesDifficulty
+        );
+    });
+}
+
+async function exportRoadmap() {
+    const roadmapId = getRoadmapId();
+
+    if (!roadmapId) {
+        return;
+    }
+
+    const roadmap = await getRoadmap(roadmapId);
+    const skills = await getSkillsByRoadmap(roadmapId);
+
+    const roadmapData = {
+        roadmap: roadmap,
+        skills: skills
+    };
+
+    const jsonData = JSON.stringify(roadmapData, null, 2);
+
+    const blob = new Blob(
+        [jsonData],
+        { type: "application/json" }
+    );
+
+    const downloadUrl = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = `${roadmap.name}.json`;
+
+    link.click();
+
+    URL.revokeObjectURL(downloadUrl);
+}
+
+async function importRoadmap(event) {
+    const file = event.target.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.addEventListener("load", async () => {
+        try {
+            const roadmapData = JSON.parse(reader.result);
+
+            if (!roadmapData.roadmap || !Array.isArray(roadmapData.skills)) {
+                throw new Error("Invalid SkillMap JSON structure.");
+            }
+
+            const importedRoadmap = {
+                ...roadmapData.roadmap,
+                id: crypto.randomUUID(),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            await addRoadmap(importedRoadmap);
+
+            const skillIdMap = new Map();
+
+            roadmapData.skills.forEach((skill) => {
+                skillIdMap.set(
+                    skill.id,
+                    crypto.randomUUID()
+                );
+            });
+
+            for (const skill of roadmapData.skills) {
+              const importedSkill = {
+                ...skill,
+                id: skillIdMap.get(skill.id),
+                roadmapId: importedRoadmap.id,
+                prerequisites: skill.prerequisites.map((prerequisiteId) => {
+                    return skillIdMap.get(prerequisiteId);
+                })
+            };
+
+                await addSkill(importedSkill);
+            }
+
+            alert("Roadmap imported successfully.");
+
+            window.location.href =
+                `roadmap.html?id=${importedRoadmap.id}`;
+
+        } catch (error) {
+            alert("Failed to import roadmap.");
+            console.error("Failed to import roadmap:", error);
+        }
+    });
+
+    reader.readAsText(file);
+}
+
 
 function loadRoadmap() {
     const roadmapId = getRoadmapId();
@@ -347,7 +475,10 @@ function loadPrerequisites() {
 
             prerequisiteList.innerHTML = "";
 
-            skills.forEach((skill) => {
+           skills.forEach((skill) => {
+            if (skill.id === editingSkillId) {
+                    return;
+                }
 
                 const label = document.createElement("label");
 
@@ -370,6 +501,27 @@ function loadPrerequisites() {
         });
 }
 
+skillSearchInput.addEventListener("input", () => {
+    refreshRoadmap();
+});
+
+statusFilter.addEventListener("change", () => {
+    refreshRoadmap();
+});
+
+difficultyFilter.addEventListener("change", () => {
+    refreshRoadmap();
+});
+
+exportButton.addEventListener("click", () => {
+    exportRoadmap().catch((error) => {
+        console.error("Failed to export roadmap:", error);
+    });
+});
+
+importInput.addEventListener("change", (event) => {
+    importRoadmap(event);
+});
 
 openDatabase()
     .then(() => {
