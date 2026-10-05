@@ -2,6 +2,7 @@ import {
     openDatabase,
     addRoadmap,
     getRoadmaps,
+    getSkillsByRoadmap,
     updateRoadmap,
     deleteRoadmap
 } from "./db.js";
@@ -18,7 +19,21 @@ const roadmapDescriptionInput = document.querySelector("#roadmap-description");
 
 function loadRoadmaps() {
     getRoadmaps()
-        .then((roadmaps) => {
+        .then(async (roadmaps) => {
+            for (const roadmap of roadmaps) {
+                const skills = await getSkillsByRoadmap(roadmap.id);
+
+                const completedSkills = skills.filter((skill) => {
+                    return skill.status === "done";
+                });
+
+                roadmap.progress = skills.length === 0
+                    ? 0
+                    : Math.round(
+                        (completedSkills.length / skills.length) * 100
+                    );
+            }
+
             renderRoadmaps(roadmaps);
         })
         .catch((error) => {

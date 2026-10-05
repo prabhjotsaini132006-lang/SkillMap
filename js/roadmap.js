@@ -104,9 +104,10 @@ async function refreshRoadmap() {
             ? `Suggested Next Skill: ${suggestedSkill.name}`
             : "Suggested Next Skill: None";
 
-    renderSkills(filterSkills(skills));
+   renderSkills(filterSkills(skills));
     renderSkillTree(skills);
     drawSkillTreeLines(skills);
+    loadPrerequisites();
 }
 
 function filterSkills(skills) {
@@ -306,6 +307,22 @@ async function createSkill(event) {
 ).map((checkbox) => checkbox.value);
 
 const skills = await getSkillsByRoadmap(roadmapId);
+if (skillStatusInput.value === "done") {
+    const prerequisitesComplete = selectedPrerequisites.every(
+        (prerequisiteId) => {
+            const prerequisite = skills.find((skill) => {
+                return skill.id === prerequisiteId;
+            });
+
+            return prerequisite && prerequisite.status === "done";
+        }
+    );
+
+    if (!prerequisitesComplete) {
+        alert("Complete all prerequisites before marking this skill as done.");
+        return;
+    }
+}
 
     if (editingSkillId) {
 
@@ -385,12 +402,15 @@ function editSkill(skillId) {
             editingSkillId = skill.id;
             skillSubmitButton.textContent = "Update Skill";
 
+            loadPrerequisites();
+
             skillNameInput.value = skill.name;
             skillDescriptionInput.value = skill.description;
             skillDifficultyInput.value = skill.difficulty;
             skillResourceInput.value = skill.resourceUrl;
             skillStatusInput.value = skill.status;
 
+           return loadPrerequisites().then(() => {
             const prerequisiteInputs = document.querySelectorAll(
                 "#prerequisite-list input"
             );
@@ -398,6 +418,7 @@ function editSkill(skillId) {
             prerequisiteInputs.forEach((input) => {
                 input.checked = skill.prerequisites.includes(input.value);
             });
+        });
 
             console.log("Form values loaded:", {
                 name: skillNameInput.value,
@@ -463,10 +484,10 @@ function loadPrerequisites() {
     const roadmapId = getRoadmapId();
 
     if (!roadmapId) {
-        return;
+        return Promise.resolve();
     }
 
-    getSkillsByRoadmap(roadmapId)
+    return getSkillsByRoadmap(roadmapId)
         .then((skills) => {
 
             const prerequisiteList = document.querySelector(

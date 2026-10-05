@@ -23,7 +23,7 @@ function renderRoadmaps(roadmaps) {
 
                 <p>${roadmap.description}</p>
 
-                <p>Progress: 0%</p>
+                <p>Progress: ${roadmap.progress || 0}%</p>
 
             </div>
 

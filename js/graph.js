@@ -10,13 +10,12 @@ function arePrerequisitesComplete(skill, skills) {
 
 
 function getSkillStatus(skill, skills) {
+    if (!arePrerequisitesComplete(skill, skills)) {
+        return "locked";
+    }
 
     if (skill.status === "done") {
         return "done";
-    }
-
-    if (!arePrerequisitesComplete(skill, skills)) {
-        return "locked";
     }
 
     if (skill.status === "in-progress") {
