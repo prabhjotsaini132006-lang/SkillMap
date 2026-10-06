@@ -1,20 +1,58 @@
 :root {
-    --color-background: #f4f6f8;
+    --color-background: #f5f7fb;
     --color-surface: #ffffff;
+    --color-surface-soft: #f8fafc;
 
     --color-primary: #2563eb;
     --color-primary-dark: #1d4ed8;
+    --color-primary-soft: #eff6ff;
 
-    --color-text: #1f2937;
-    --color-text-muted: #6b7280;
+    --color-text: #172033;
+    --color-text-secondary: #475569;
+    --color-text-muted: #64748b;
 
-    --color-border: #d1d5db;
+    --color-border: #e2e8f0;
+    --color-border-strong: #cbd5e1;
 
+    --color-success: #16a34a;
+    --color-warning: #d97706;
+    --color-danger: #dc2626;
+
+    --spacing-xs: 0.35rem;
     --spacing-small: 0.5rem;
     --spacing-medium: 1rem;
     --spacing-large: 2rem;
+    --spacing-xl: 3rem;
 
-    --border-radius: 8px;
+    --border-radius-small: 6px;
+    --border-radius: 12px;
+    --border-radius-large: 18px;
+
+    --shadow-small: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-medium: 0 8px 24px rgba(15, 23, 42, 0.08);
+
+    --transition: 0.2s ease;
+}
+
+:root[data-theme="dark"] {
+    --color-background: #0f172a;
+    --color-surface: #1e293b;
+    --color-surface-soft: #172033;
+
+    --color-primary: #60a5fa;
+    --color-primary-dark: #3b82f6;
+    --color-primary-soft: #172554;
+
+    --color-text: #f8fafc;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #94a3b8;
+
+    --color-border: #334155;
+    --color-border-strong: #475569;
+
+    --color-success: #4ade80;
+    --color-warning: #fbbf24;
+    --color-danger: #f87171;
 }
 
 :root[data-theme="dark"] {
@@ -36,12 +74,51 @@
 
 body {
     margin: 0;
-
     font-family: Arial, sans-serif;
     line-height: 1.6;
-
     background-color: var(--color-background);
     color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+    margin-top: 0;
+    line-height: 1.2;
+    color: var(--color-text);
+}
+
+h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: -0.03em;
+}
+
+h2 {
+    font-size: 1.6rem;
+    letter-spacing: -0.02em;
+}
+
+h3 {
+    font-size: 1.15rem;
+}
+
+p {
+    color: var(--color-text-secondary);
+}
+
+a {
+    color: var(--color-primary);
+    transition: color var(--transition);
+}
+
+a:hover {
+    color: var(--color-primary-dark);
+}
+
+.container {
+    width: min(1120px, 92%);
+    margin: 0 auto;
 }
 
 button,
