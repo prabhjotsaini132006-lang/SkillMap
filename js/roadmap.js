@@ -24,18 +24,21 @@ import {
 } from "./graph.js";
 
 const skillForm = document.querySelector("#skill-form");
-
 const skillNameInput = document.querySelector("#skill-name");
 const skillDescriptionInput = document.querySelector("#skill-description");
 const skillDifficultyInput = document.querySelector("#skill-difficulty");
+const skillDeadlineInput = document.querySelector("#skill-deadline");
 const skillResourceInput = document.querySelector("#skill-resource");
 const skillStatusInput = document.querySelector("#skill-status");
 const skillSubmitButton = document.querySelector("#skill-submit-button");
+
 const skillSearchInput = document.querySelector("#skill-search");
 const statusFilter = document.querySelector("#status-filter");
 const difficultyFilter = document.querySelector("#difficulty-filter");
+
 const exportButton = document.querySelector("#export-roadmap");
 const importInput = document.querySelector("#import-roadmap");
+
 let editingSkillId = null;
 
 function getRoadmapId() {
@@ -44,38 +47,14 @@ function getRoadmapId() {
     return parameters.get("id");
 }
 
-
-function loadSkills() {
-    const roadmapId = getRoadmapId();
-
-    if (!roadmapId) {
-        return;
-    }
-
-    getSkillsByRoadmap(roadmapId)
-    .then((skills) => {
-        
-        skills.forEach((skill) => {
-        skill.status = getSkillStatus(skill, skills);
-        skill.level = getSkillLevel(skill, skills);
+function prepareSkills(skills) {
+    return skills.map((skill) => {
+        return {
+            ...skill,
+            status: getSkillStatus(skill, skills),
+            level: getSkillLevel(skill, skills)
+        };
     });
-
-    const progress = getProgress(skills);
-
-    const progressElement = document.querySelector(
-        "#roadmap-progress"
-    );
-
-    progressElement.textContent = `Progress: ${progress}%`;
-
-    renderSkills(skills);
-    renderSkillTree(skills);
-    drawSkillTreeLines(skills);
-        
-    })
-        .catch((error) => {
-            console.error("Failed to load skills:", error);
-        });
 }
 
 async function refreshRoadmap() {
@@ -85,29 +64,28 @@ async function refreshRoadmap() {
         return;
     }
 
-    const skills = await getSkillsByRoadmap(roadmapId);
+    try {
+        const skills = await getSkillsByRoadmap(roadmapId);
+        const preparedSkills = prepareSkills(skills);
+        const progress = getProgress(skills);
+        const suggestedSkill = getSuggestedSkill(skills);
 
-    skills.forEach((skill) => {
-        skill.status = getSkillStatus(skill, skills);
-        skill.level = getSkillLevel(skill, skills);
-    });
+        document.querySelector("#roadmap-progress").textContent =
+            `Progress: ${progress}%`;
 
-    const progress = getProgress(skills);
+        document.querySelector("#suggested-skill").textContent =
+            suggestedSkill
+                ? `Suggested Next Skill: ${suggestedSkill.name}`
+                : "Suggested Next Skill: None";
 
-    document.querySelector("#roadmap-progress").textContent =
-        `Progress: ${progress}%`;
+        renderSkills(filterSkills(preparedSkills));
+        renderSkillTree(preparedSkills);
+        drawSkillTreeLines(preparedSkills);
 
-    const suggestedSkill = getSuggestedSkill(skills);
-
-    document.querySelector("#suggested-skill").textContent =
-        suggestedSkill
-            ? `Suggested Next Skill: ${suggestedSkill.name}`
-            : "Suggested Next Skill: None";
-
-   renderSkills(filterSkills(skills));
-    renderSkillTree(skills);
-    drawSkillTreeLines(skills);
-    loadPrerequisites();
+        await loadPrerequisites();
+    } catch (error) {
+        console.error("Failed to refresh roadmap:", error);
+    }
 }
 
 function filterSkills(skills) {
@@ -128,166 +106,64 @@ function filterSkills(skills) {
             selectedDifficulty === "all" ||
             skill.difficulty === selectedDifficulty;
 
-        return (
-            matchesSearch &&
-            matchesStatus &&
-            matchesDifficulty
-        );
+        return matchesSearch && matchesStatus && matchesDifficulty;
     });
 }
 
-async function exportRoadmap() {
+async function loadRoadmap() {
     const roadmapId = getRoadmapId();
 
     if (!roadmapId) {
         return;
     }
 
-    const roadmap = await getRoadmap(roadmapId);
-    const skills = await getSkillsByRoadmap(roadmapId);
+    try {
+        const roadmap = await getRoadmap(roadmapId);
 
-    const roadmapData = {
-        roadmap: roadmap,
-        skills: skills
-    };
-
-    const jsonData = JSON.stringify(roadmapData, null, 2);
-
-    const blob = new Blob(
-        [jsonData],
-        { type: "application/json" }
-    );
-
-    const downloadUrl = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = `${roadmap.name}.json`;
-
-    link.click();
-
-    URL.revokeObjectURL(downloadUrl);
-}
-
-async function importRoadmap(event) {
-    const file = event.target.files[0];
-
-    if (!file) {
-        return;
-    }
-
-    const reader = new FileReader();
-
-    reader.addEventListener("load", async () => {
-        try {
-            const roadmapData = JSON.parse(reader.result);
-
-            if (!roadmapData.roadmap || !Array.isArray(roadmapData.skills)) {
-                throw new Error("Invalid SkillMap JSON structure.");
-            }
-
-            const importedRoadmap = {
-                ...roadmapData.roadmap,
-                id: crypto.randomUUID(),
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-
-            await addRoadmap(importedRoadmap);
-
-            const skillIdMap = new Map();
-
-            roadmapData.skills.forEach((skill) => {
-                skillIdMap.set(
-                    skill.id,
-                    crypto.randomUUID()
-                );
-            });
-
-            for (const skill of roadmapData.skills) {
-              const importedSkill = {
-                ...skill,
-                id: skillIdMap.get(skill.id),
-                roadmapId: importedRoadmap.id,
-                prerequisites: skill.prerequisites.map((prerequisiteId) => {
-                    return skillIdMap.get(prerequisiteId);
-                })
-            };
-
-                await addSkill(importedSkill);
-            }
-
-            alert("Roadmap imported successfully.");
-
-            window.location.href =
-                `roadmap.html?id=${importedRoadmap.id}`;
-
-        } catch (error) {
-            alert("Failed to import roadmap.");
-            console.error("Failed to import roadmap:", error);
+        if (!roadmap) {
+            throw new Error("Roadmap not found.");
         }
-    });
 
-    reader.readAsText(file);
+        document.querySelector("#roadmap-title").textContent =
+            roadmap.name;
+
+        document.querySelector("#roadmap-description").textContent =
+            roadmap.description || "No description provided.";
+    } catch (error) {
+        console.error("Failed to load roadmap:", error);
+    }
 }
 
-
-function loadRoadmap() {
+async function loadPrerequisites() {
     const roadmapId = getRoadmapId();
 
     if (!roadmapId) {
         return;
     }
 
-    getRoadmap(roadmapId)
-        .then((roadmap) => {
-            if (!roadmap) {
-                throw new Error("Roadmap not found.");
-            }
+    try {
+        const skills = await getSkillsByRoadmap(roadmapId);
+        const prerequisiteList = document.querySelector("#prerequisite-list");
 
-            document.querySelector("#roadmap-title").textContent =
-                roadmap.name;
+        prerequisiteList.innerHTML = "";
 
-            document.querySelector("#roadmap-description").textContent =
-                roadmap.description;
-        })
-        .catch((error) => {
-            console.error("Failed to load roadmap:", error);
-        });
-}
-
-function loadSuggestedSkill() {
-    const roadmapId = getRoadmapId();
-
-    if (!roadmapId) {
-        return;
-    }
-
-    getSkillsByRoadmap(roadmapId)
-        .then((skills) => {
-
-            const suggestedSkillElement = document.querySelector(
-                "#suggested-skill"
-            );
-
-            const suggestedSkill = getSuggestedSkill(skills);
-
-            if (!suggestedSkill) {
-                suggestedSkillElement.textContent =
-                    "Suggested Next Skill: None";
-
+        skills.forEach((skill) => {
+            if (skill.id === editingSkillId) {
                 return;
             }
 
-            suggestedSkillElement.textContent =
-                `Suggested Next Skill: ${suggestedSkill.name}`;
-        })
-        .catch((error) => {
-            console.error(
-                "Failed to load suggested skill:",
-                error
-            );
+            const label = document.createElement("label");
+
+            label.innerHTML = `
+                <input type="checkbox" value="${skill.id}">
+                ${skill.name}
+            `;
+
+            prerequisiteList.appendChild(label);
         });
+    } catch (error) {
+        console.error("Failed to load prerequisites:", error);
+    }
 }
 
 async function createSkill(event) {
@@ -300,256 +176,295 @@ async function createSkill(event) {
         return;
     }
 
+    const name = skillNameInput.value.trim();
+
+    if (name.length < 2) {
+        alert("Skill name must be at least 2 characters.");
+        return;
+    }
+
     const selectedPrerequisites = Array.from(
-        document.querySelectorAll(
-            "#prerequisite-list input:checked"
-        )
-).map((checkbox) => checkbox.value);
+        document.querySelectorAll("#prerequisite-list input:checked")
+    ).map((checkbox) => checkbox.value);
 
-const skills = await getSkillsByRoadmap(roadmapId);
-if (skillStatusInput.value === "done") {
-    const prerequisitesComplete = selectedPrerequisites.every(
-        (prerequisiteId) => {
-            const prerequisite = skills.find((skill) => {
-                return skill.id === prerequisiteId;
-            });
+    try {
+        const skills = await getSkillsByRoadmap(roadmapId);
 
-            return prerequisite && prerequisite.status === "done";
-        }
-    );
+        if (skillStatusInput.value === "done") {
+            const prerequisitesComplete = selectedPrerequisites.every(
+                (id) => {
+                    const prerequisite = skills.find((skill) => {
+                        return skill.id === id;
+                    });
 
-    if (!prerequisitesComplete) {
-        alert("Complete all prerequisites before marking this skill as done.");
-        return;
-    }
-}
-
-    if (editingSkillId) {
-
-    const cycleDetected = selectedPrerequisites.some((prerequisiteId) => {
-        return wouldCreateCycle(
-            editingSkillId,
-            prerequisiteId,
-            skills
-        );
-    });
-
-    if (cycleDetected) {
-        alert("This prerequisite would create a cycle.");
-        return;
-    }
-}
-
-    if (editingSkillId) {
-        getSkill(editingSkillId)
-            .then((skill) => {
-                if (!skill) {
-                    throw new Error("Skill not found.");
+                    return prerequisite && prerequisite.status === "done";
                 }
+            );
 
-                skill.name = skillNameInput.value.trim();
-                skill.description = skillDescriptionInput.value.trim();
-                skill.difficulty = skillDifficultyInput.value;
-                skill.resourceUrl = skillResourceInput.value.trim();
-                skill.status = skillStatusInput.value;
-                skill.prerequisites = selectedPrerequisites;
-                return updateSkill(skill);
-            })
-                .then(() => {
-            editingSkillId = null;
-            skillForm.reset();
-            skillSubmitButton.textContent = "Add Skill";
+            if (!prerequisitesComplete) {
+                alert(
+                    "Complete all prerequisites before marking this skill as done."
+                );
+                return;
+            }
+        }
 
-            return refreshRoadmap();
-        })
-            .catch((error) => {
-                console.error("Failed to update skill:", error);
+        if (editingSkillId) {
+            const cycleDetected = selectedPrerequisites.some((id) => {
+                return wouldCreateCycle(
+                    editingSkillId,
+                    id,
+                    skills
+                );
             });
 
-        return;
-    }
+            if (cycleDetected) {
+                alert("This prerequisite would create a cycle.");
+                return;
+            }
 
-    const skill = {
-        id: crypto.randomUUID(),
-        roadmapId: roadmapId,
-        name: skillNameInput.value.trim(),
-        description: skillDescriptionInput.value.trim(),
-        difficulty: skillDifficultyInput.value,
-        resourceUrl: skillResourceInput.value.trim(),
-        status: skillStatusInput.value,
-        prerequisites: selectedPrerequisites
-    };
-
-    addSkill(skill)
-        .then(() => {
-            skillForm.reset();
-            return refreshRoadmap();
-        })
-        .catch((error) => {
-            console.error("Failed to create skill:", error);
-        });
-}
-
-function editSkill(skillId) {
-    getSkill(skillId)
-        .then((skill) => {
-            console.log("Skill received for editing:", skill);
+            const skill = await getSkill(editingSkillId);
 
             if (!skill) {
                 throw new Error("Skill not found.");
             }
 
-            editingSkillId = skill.id;
-            skillSubmitButton.textContent = "Update Skill";
+            skill.name = name;
+            skill.description = skillDescriptionInput.value.trim();
+            skill.difficulty = skillDifficultyInput.value;
+            skill.deadline = skillDeadlineInput.value;
+            skill.resourceUrl = skillResourceInput.value.trim();
+            skill.status = skillStatusInput.value;
+            skill.prerequisites = selectedPrerequisites;
 
-            loadPrerequisites();
+            await updateSkill(skill);
 
-            skillNameInput.value = skill.name;
-            skillDescriptionInput.value = skill.description;
-            skillDifficultyInput.value = skill.difficulty;
-            skillResourceInput.value = skill.resourceUrl;
-            skillStatusInput.value = skill.status;
+            resetSkillForm();
+            await refreshRoadmap();
 
-           return loadPrerequisites().then(() => {
-            const prerequisiteInputs = document.querySelectorAll(
-                "#prerequisite-list input"
-            );
+            return;
+        }
 
-            prerequisiteInputs.forEach((input) => {
-                input.checked = skill.prerequisites.includes(input.value);
-            });
-        });
+        const skill = {
+            id: crypto.randomUUID(),
+            roadmapId,
+            name,
+            description: skillDescriptionInput.value.trim(),
+            difficulty: skillDifficultyInput.value,
+            deadline: skillDeadlineInput.value,
+            resourceUrl: skillResourceInput.value.trim(),
+            status: skillStatusInput.value,
+            prerequisites: selectedPrerequisites
+        };
 
-            console.log("Form values loaded:", {
-                name: skillNameInput.value,
-                description: skillDescriptionInput.value,
-                difficulty: skillDifficultyInput.value,
-                resource: skillResourceInput.value
-            });
-        })
-        .catch((error) => {
-            console.error("Failed to load skill:", error);
-        });
+        await addSkill(skill);
+
+        resetSkillForm();
+        await refreshRoadmap();
+    } catch (error) {
+        console.error("Failed to save skill:", error);
+    }
 }
 
+async function editSkill(skillId) {
+    try {
+        const skill = await getSkill(skillId);
 
-skillForm.addEventListener("submit", createSkill);
+        if (!skill) {
+            throw new Error("Skill not found.");
+        }
 
-const skillList = document.querySelector("#skill-list");
+        editingSkillId = skill.id;
+        skillSubmitButton.textContent = "Update Skill";
 
-skillList.addEventListener("click", (event) => {
-    console.log("Skill list clicked.");
+        skillNameInput.value = skill.name;
+        skillDescriptionInput.value = skill.description || "";
+        skillDifficultyInput.value = skill.difficulty || "easy";
+        skillDeadlineInput.value = skill.deadline || "";
+        skillResourceInput.value = skill.resourceUrl || "";
+        skillStatusInput.value = skill.status || "available";
 
-    const button = event.target.closest("button");
+        await loadPrerequisites();
 
-    if (!button) {
+        const prerequisiteInputs = document.querySelectorAll(
+            "#prerequisite-list input"
+        );
+
+        prerequisiteInputs.forEach((input) => {
+            input.checked = skill.prerequisites.includes(input.value);
+        });
+
+        skillForm.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    } catch (error) {
+        console.error("Failed to load skill:", error);
+    }
+}
+
+function resetSkillForm() {
+    editingSkillId = null;
+
+    skillForm.reset();
+    skillSubmitButton.textContent = "Add Skill";
+
+    loadPrerequisites();
+}
+
+async function removeSkill(skillId) {
+    if (!confirm("Are you sure you want to delete this skill?")) {
         return;
     }
 
-    const action = button.dataset.action;
-    const skillId = button.dataset.skillId;
-
-    console.log("Button action:", action);
-    console.log("Skill ID:", skillId);
-
-    if (action === "edit-skill") {
-        console.log("Edit clicked:", skillId);
-        editSkill(skillId);
+    try {
+        await deleteSkill(skillId);
+        await refreshRoadmap();
+    } catch (error) {
+        console.error("Failed to delete skill:", error);
     }
-
-    if (action === "delete-skill") {
-        removeSkill(skillId);
-    }
-});
-
-function removeSkill(skillId) {
-    const confirmed = confirm(
-        "Are you sure you want to delete this skill?"
-    );
-
-    if (!confirmed) {
-        return;
-    }
-
-    deleteSkill(skillId)
-        .then(() => {
-            return refreshRoadmap();
-        })
-        .catch((error) => {
-            console.error("Failed to delete skill:", error);
-        });
 }
 
-function loadPrerequisites() {
+async function exportRoadmap() {
     const roadmapId = getRoadmapId();
 
     if (!roadmapId) {
-        return Promise.resolve();
+        return;
     }
 
-    return getSkillsByRoadmap(roadmapId)
-        .then((skills) => {
+    try {
+        const roadmap = await getRoadmap(roadmapId);
+        const skills = await getSkillsByRoadmap(roadmapId);
 
-            const prerequisiteList = document.querySelector(
-                "#prerequisite-list"
-            );
+        const roadmapData = {
+            roadmap,
+            skills
+        };
 
-            prerequisiteList.innerHTML = "";
+        const jsonData = JSON.stringify(
+            roadmapData,
+            null,
+            2
+        );
 
-           skills.forEach((skill) => {
-            if (skill.id === editingSkillId) {
-                    return;
-                }
+        const blob = new Blob(
+            [jsonData],
+            { type: "application/json" }
+        );
 
-                const label = document.createElement("label");
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
 
-                label.innerHTML = `
-                    <input
-                        type="checkbox"
-                        value="${skill.id}"
-                    >
-                    ${skill.name}
-                `;
+        link.href = downloadUrl;
+        link.download = `${roadmap.name}.json`;
 
-                prerequisiteList.appendChild(label);
-            });
-        })
-        .catch((error) => {
-            console.error(
-                "Failed to load prerequisites:",
-                error
-            );
-        });
+        link.click();
+
+        URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+        console.error("Failed to export roadmap:", error);
+    }
 }
 
-skillSearchInput.addEventListener("input", () => {
-    refreshRoadmap();
-});
+async function importRoadmap(event) {
+    const file = event.target.files[0];
 
-statusFilter.addEventListener("change", () => {
-    refreshRoadmap();
-});
+    if (!file) {
+        return;
+    }
 
-difficultyFilter.addEventListener("change", () => {
-    refreshRoadmap();
-});
+    try {
+        const text = await file.text();
+        const roadmapData = JSON.parse(text);
+
+        if (
+            !roadmapData.roadmap ||
+            !Array.isArray(roadmapData.skills)
+        ) {
+            throw new Error("Invalid SkillMap JSON structure.");
+        }
+
+        const importedRoadmap = {
+            ...roadmapData.roadmap,
+            id: crypto.randomUUID(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        await addRoadmap(importedRoadmap);
+
+        const skillIdMap = new Map();
+
+        roadmapData.skills.forEach((skill) => {
+            skillIdMap.set(
+                skill.id,
+                crypto.randomUUID()
+            );
+        });
+
+        for (const skill of roadmapData.skills) {
+            const importedSkill = {
+                ...skill,
+                id: skillIdMap.get(skill.id),
+                roadmapId: importedRoadmap.id,
+                prerequisites: skill.prerequisites.map((id) => {
+                    return skillIdMap.get(id);
+                })
+            };
+
+            await addSkill(importedSkill);
+        }
+
+        alert("Roadmap imported successfully.");
+
+        window.location.href =
+            `roadmap.html?id=${importedRoadmap.id}`;
+    } catch (error) {
+        alert("Failed to import roadmap.");
+        console.error("Failed to import roadmap:", error);
+    } finally {
+        importInput.value = "";
+    }
+}
+
+skillForm.addEventListener("submit", createSkill);
+
+document.querySelector("#skill-list").addEventListener(
+    "click",
+    (event) => {
+        const button = event.target.closest("button");
+
+        if (!button) {
+            return;
+        }
+
+        const action = button.dataset.action;
+        const skillId = button.dataset.skillId;
+
+        if (action === "edit-skill") {
+            editSkill(skillId);
+        }
+
+        if (action === "delete-skill") {
+            removeSkill(skillId);
+        }
+    }
+);
+
+skillSearchInput.addEventListener("input", refreshRoadmap);
+statusFilter.addEventListener("change", refreshRoadmap);
+difficultyFilter.addEventListener("change", refreshRoadmap);
 
 exportButton.addEventListener("click", () => {
-    exportRoadmap().catch((error) => {
-        console.error("Failed to export roadmap:", error);
-    });
+    exportRoadmap();
 });
 
-importInput.addEventListener("change", (event) => {
-    importRoadmap(event);
-});
+importInput.addEventListener("change", importRoadmap);
 
 openDatabase()
-    .then(() => {
-        loadRoadmap();
-        loadSkills();
-        loadPrerequisites();
-        loadSuggestedSkill();
+    .then(async () => {
+        await loadRoadmap();
+        await refreshRoadmap();
     })
     .catch((error) => {
         console.error("Failed to open database:", error);

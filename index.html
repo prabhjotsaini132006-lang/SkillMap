@@ -3,179 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>SkillMap - Roadmaps</title>
-
+    <title>SkillMap - Dashboard</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-
     <header class="site-header">
         <div class="container header-content">
-
             <a href="index.html" class="logo">
+                <span class="logo-icon">◆</span>
                 SkillMap
             </a>
+
+            <nav class="main-navigation" aria-label="Main navigation">
+                <a href="index.html" class="nav-link active">Dashboard</a>
+                <a href="calendar.html" class="btn btn-secondary">Calendar</a>
 
             <button
                 type="button"
                 id="theme-toggle"
-                class="btn btn-secondary"
-            >
-                Toggle Theme
-            </button>
-
+                class="icon-button"
+                aria-label="Toggle theme"
+                title="Toggle theme"
+            >◐</button>
         </div>
     </header>
 
-    <main class="container">
+    <main class="dashboard container">
+        <section class="dashboard-hero">
+            <div class="hero-content">
+                <span class="eyebrow">YOUR LEARNING SPACE</span>
 
-        <section class="page-intro">
-            <h1>My Roadmaps</h1>
+                <h1>
+                    Build your skills.<br>
+                    <span>One step at a time.</span>
+                </h1>
 
-            <p>
-                Build your learning path and track your progress
-                through a skill-based roadmap.
-            </p>
-        </section>
-
-
-        <section
-            class="roadmap-creation"
-            aria-labelledby="create-roadmap-heading"
-        >
-
-            <h2 id="create-roadmap-heading">
-                Create a Roadmap
-            </h2>
-
-            <form id="roadmap-form">
-
-                <div class="form-group">
-
-                    <label for="roadmap-name">
-                        Roadmap Name
-                    </label>
-
-                    <input
-                        type="text"
-                        id="roadmap-name"
-                        name="roadmap-name"
-                        placeholder="e.g. Full Stack Development"
-                        minlength="3"
-                        maxlength="100"
-                        autocomplete="off"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="roadmap-description">
-                        Description
-                    </label>
-
-                    <textarea
-                        id="roadmap-description"
-                        name="roadmap-description"
-                        placeholder="Describe what you want to learn..."
-                        rows="4"
-                        maxlength="500"
-                    ></textarea>
-
-                </div>
-
-
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                >
-                    Create Roadmap
-                </button>
-
-            </form>
-
-        </section>
-
-
-        <section
-            class="roadmaps-section"
-            aria-labelledby="roadmaps-heading"
-        >
-
-            <h2 id="roadmaps-heading">
-                Your Roadmaps
-            </h2>
-
-            <div id="roadmap-list">
-
-                <!-- Roadmap cards will be created using JavaScript. -->
-
-                <article class="roadmap-card">
-
-                    <div class="roadmap-card-content">
-
-                        <h3>
-                            Example Roadmap
-                        </h3>
-
-                        <p>
-                            Your roadmap cards will appear here.
-                        </p>
-
-                        <p>
-                            Progress: 0%
-                        </p>
-
-                    </div>
-
-
-                    <div class="roadmap-card-actions">
-
-                        <a
-                            href="roadmap.html"
-                            class="btn btn-primary"
-                        >
-                            Open
-                        </a>
-
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                        >
-                            Rename
-                        </button>
-
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                        >
-                            Delete
-                        </button>
-
-                    </div>
-
-                </article>
-
+                <p>
+                    Organize your learning journey, follow dependencies,
+                    and keep moving toward your goals.
+                </p>
             </div>
 
+            <div class="hero-decoration" aria-hidden="true">
+                <div class="hero-orbit orbit-one"></div>
+                <div class="hero-orbit orbit-two"></div>
+                <div class="hero-orbit orbit-three"></div>
+                <div class="hero-core">✦</div>
+            </div>
         </section>
 
+        <section class="dashboard-stats" aria-label="Learning statistics">
+            <article class="stat-card">
+                <div class="stat-icon stat-icon-blue">◆</div>
+                <div>
+                    <span class="stat-label">Roadmaps</span>
+                    <strong id="roadmap-count" class="stat-value">0</strong>
+                </div>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-icon stat-icon-green">✓</div>
+                <div>
+                    <span class="stat-label">Overall Progress</span>
+                    <strong id="overall-progress" class="stat-value">0%</strong>
+                </div>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-icon stat-icon-orange">◷</div>
+                <div>
+                    <span class="stat-label">Due Soon</span>
+                    <strong id="due-soon-count" class="stat-value">0</strong>
+                </div>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-icon stat-icon-red">!</div>
+                <div>
+                    <span class="stat-label">Overdue</span>
+                    <strong id="overdue-count" class="stat-value">0</strong>
+                </div>
+            </article>
+        </section>
+
+        <section class="dashboard-section" aria-labelledby="roadmaps-heading">
+            <div class="section-header">
+                <div>
+                    <span class="section-kicker">LEARNING PATHS</span>
+                    <h2 id="roadmaps-heading">Your Roadmaps</h2>
+                    <p>Continue where you left off.</p>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="create-roadmap-button"
+                >
+                    + New Roadmap
+                </button>
+            </div>
+
+            <section
+                class="roadmap-creation"
+                id="roadmap-creation-panel"
+                aria-labelledby="create-roadmap-heading"
+            >
+                <div class="creation-header">
+                    <span class="section-kicker">NEW JOURNEY</span>
+                    <h2 id="create-roadmap-heading">Create a Roadmap</h2>
+                    <p>Define what you want to learn and build your path.</p>
+                </div>
+
+                <form id="roadmap-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="roadmap-name">Roadmap Name</label>
+                            <input
+                                type="text"
+                                id="roadmap-name"
+                                name="roadmap-name"
+                                placeholder="e.g. Full Stack Development"
+                                minlength="3"
+                                maxlength="100"
+                                autocomplete="off"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="roadmap-description">Description</label>
+                            <textarea
+                                id="roadmap-description"
+                                name="roadmap-description"
+                                placeholder="What do you want to achieve?"
+                                rows="3"
+                                maxlength="500"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <div class="creation-actions">
+                        <button type="submit" class="btn btn-primary">
+                            Create Roadmap
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <div id="roadmap-list" class="roadmap-grid"></div>
+        </section>
+
+        <section class="dashboard-bottom-grid">
+            <section class="dashboard-panel" aria-labelledby="deadlines-heading">
+                <div class="panel-header">
+                    <div>
+                        <span class="section-kicker">STAY ON TRACK</span>
+                        <h2 id="deadlines-heading">Upcoming Deadlines</h2>
+                    </div>
+                    <span class="panel-icon">◷</span>
+                </div>
+
+                <div id="deadline-list" class="deadline-list">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✓</div>
+                        <p>No upcoming deadlines.</p>
+                        <span>
+                            Add deadlines to your skills to see them here.
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-panel" aria-labelledby="calendar-heading">
+                <div class="panel-header">
+                    <div>
+                        <span class="section-kicker">PLANNING</span>
+                        <h2 id="calendar-heading">Calendar</h2>
+                    </div>
+                    <span class="panel-icon">□</span>
+                </div>
+
+                <div class="calendar-placeholder">
+                    <div class="calendar-placeholder-icon">◫</div>
+                    <h3>Your learning calendar</h3>
+                    <p>
+                        See deadlines and learning milestones organized by date.
+                    </p>
+                    <a href="calendar.html" class="btn btn-secondary">
+                        Open Calendar →
+                    </a>
+                </div>
+            </section>
+        </section>
     </main>
 
-
     <footer class="site-footer">
-
-        <p>
-            &copy; 2026 SkillMap
-        </p>
-
+        <div class="container">
+            <p>&copy; 2026 SkillMap</p>
+        </div>
     </footer>
-
-
 
     <script type="module" src="js/theme.js"></script>
     <script type="module" src="js/roadmaps.js"></script>

@@ -1,13 +1,10 @@
 function arePrerequisitesComplete(skill, skills) {
-    return skill.prerequisites.every((prerequisiteId) => {
-        const prerequisite = skills.find((item) => {
-            return item.id === prerequisiteId;
-        });
+    return skill.prerequisites.every((id) => {
+        const prerequisite = skills.find((item) => item.id === id);
 
         return prerequisite && prerequisite.status === "done";
     });
 }
-
 
 function getSkillStatus(skill, skills) {
     if (!arePrerequisitesComplete(skill, skills)) {
@@ -28,76 +25,79 @@ function getSkillStatus(skill, skills) {
 function wouldCreateCycle(skillId, prerequisiteId, skills) {
     const visited = new Set();
 
-    function visit(currentId) {
-        if (currentId === skillId) {
+    function visit(id) {
+        if (id === skillId) {
             return true;
         }
 
-        if (visited.has(currentId)) {
+        if (visited.has(id)) {
             return false;
         }
 
-        visited.add(currentId);
+        visited.add(id);
 
-        const currentSkill = skills.find((skill) => {
-            return skill.id === currentId;
-        });
+        const skill = skills.find((item) => item.id === id);
 
-        if (!currentSkill) {
+        if (!skill) {
             return false;
         }
 
-        return currentSkill.prerequisites.some((id) => {
-            return visit(id);
-        });
+        return skill.prerequisites.some(visit);
     }
 
     return visit(prerequisiteId);
 }
 
 function getSuggestedSkill(skills) {
-
     const availableSkills = skills.filter((skill) => {
         return getSkillStatus(skill, skills) === "available";
     });
 
-    if (availableSkills.length === 0) {
+    if (!availableSkills.length) {
         return null;
     }
 
-    availableSkills.sort((skillA, skillB) => {
-        return skillA.prerequisites.length -
-            skillB.prerequisites.length;
+    availableSkills.sort((first, second) => {
+        return first.prerequisites.length -
+            second.prerequisites.length;
     });
 
     return availableSkills[0];
 }
 
-function getSkillLevel(skill, skills) {
-
-    if (skill.prerequisites.length === 0) {
+function getSkillLevel(skill, skills, visited = new Set()) {
+    if (!skill.prerequisites.length) {
         return 0;
     }
 
-    const prerequisiteLevels = skill.prerequisites.map((prerequisiteId) => {
+    if (visited.has(skill.id)) {
+        return 0;
+    }
 
+    const nextVisited = new Set(visited);
+    nextVisited.add(skill.id);
+
+    const levels = skill.prerequisites.map((id) => {
         const prerequisite = skills.find((item) => {
-            return item.id === prerequisiteId;
+            return item.id === id;
         });
 
         if (!prerequisite) {
             return 0;
         }
 
-        return getSkillLevel(prerequisite, skills);
+        return getSkillLevel(
+            prerequisite,
+            skills,
+            nextVisited
+        );
     });
 
-    return Math.max(...prerequisiteLevels) + 1;
+    return Math.max(...levels) + 1;
 }
 
 function getProgress(skills) {
-
-    if (skills.length === 0) {
+    if (!skills.length) {
         return 0;
     }
 

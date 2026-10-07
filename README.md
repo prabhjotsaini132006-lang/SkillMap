@@ -195,6 +195,25 @@ The system shall support:
 On mobile devices, skills shall be displayed as a stacked list grouped
 by level rather than relying on SVG connections.
 
+### FR13 — Skill Deadlines
+
+The system shall allow users to assign an optional deadline to a skill.
+
+### FR14 — Overdue Deadlines
+
+The system shall identify unfinished skills as overdue when their deadline has passed.
+
+### FR15 — Due Soon Deadlines
+
+The system shall identify unfinished skills as due soon when their deadline is within seven days.
+
+### FR16 — Calendar
+
+The system shall display skill deadlines on a calendar.
+
+### FR17 — Deadline Persistence
+
+The system shall preserve skill deadlines during roadmap export and import.
 ---
 
 ## 6. Non-Functional Requirements
