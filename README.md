@@ -11,6 +11,8 @@ learning resources, difficulty levels, and progress statuses.
 A skill remains locked until all of its prerequisites are completed.
 Completing a prerequisite can automatically unlock dependent skills.
 
+SkillMap also provides calendar-based deadline planning for roadmap skills.
+
 ---
 
 ## 2. Project Goals
