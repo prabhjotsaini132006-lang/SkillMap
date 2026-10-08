@@ -216,6 +216,7 @@ The system shall display skill deadlines on a calendar.
 ### FR17 — Deadline Persistence
 
 The system shall preserve skill deadlines during roadmap export and import.
+
 ---
 
 ## 6. Non-Functional Requirements
@@ -236,8 +237,7 @@ status indicators, and navigation.
 
 ### Maintainability
 
-JavaScript functionality shall be separated into modules according
-to responsibility.
+JavaScript functionality shall be separated into modules according to responsibility.
 
 ### Performance
 
@@ -267,3 +267,24 @@ Roadmap
 ├── description
 ├── createdAt
 └── updatedAt
+
+Skill
+A skill represents one learning unit within a roadmap.
+Skill
+├── id
+├── roadmapId
+├── name
+├── description
+├── difficulty
+├── resource
+├── status
+├── prerequisites
+└── deadline
+
+Data Relationships
+- Each roadmap can contain multiple skills.
+- Each skill belongs to one roadmap through roadmapId.
+- A skill can have zero or more prerequisite skill IDs.
+- Prerequisites must belong to the same roadmap.
+- The dependency graph is validated to prevent cycles.
+- Deadlines are optional and stored with the skill.
